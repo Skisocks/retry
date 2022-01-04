@@ -5,11 +5,11 @@ import (
 	"time"
 )
 
-type MaxRetryError struct {
+type maxRetryError struct {
 	maxRetries	int
 	backoff	time.Duration
 }
 
-func (m *MaxRetryError) Error() string {
+func (m *maxRetryError) Error() string {
 	return fmt.Sprintf("function was not successful before max retries, failed after %d attempts", m.maxRetries)
 }

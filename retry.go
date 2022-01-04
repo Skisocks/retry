@@ -5,14 +5,12 @@ import (
 	"math/rand"
 	"time"
 )
-type Function func() error
 
-var maxRetries int
-var backoffMultiplier int32
+type function func() error
 
-// Retry
+// Retry retries the functions given to it
 // set maxRetries to 0 for infinite retries
-func Retry(retryableFunction Function, maxRetries int) error {
+func Retry(retryableFunction function, maxRetries int) error {
 	var retryAttempt = 1
 	var backoffMultiplier int32 = 1
 	rand.Seed(time.Now().Unix())
@@ -22,17 +20,16 @@ func Retry(retryableFunction Function, maxRetries int) error {
 		if err := retryableFunction(); err == nil {
 			if retryAttempt == 1 {
 				return nil
-			} else {
-				log.Printf("function was sucsessful on attempt: %d\n", retryAttempt)
-				return nil
 			}
+			log.Printf("function was sucsessful on attempt: %d\n", retryAttempt)
+			return nil
 		}
 
 		// Todo: Check if the error is retryable
 
-		// If the function is not successful within maxRetries return MaxRetryError
+		// If the function is not successful within maxRetries return maxRetryError
 		if retryAttempt == maxRetries {
-			return &MaxRetryError{maxRetries: maxRetries}
+			return &maxRetryError{maxRetries: maxRetries}
 		}
 
 		log.Printf("function was unsuccessful on attempt: %d\n", retryAttempt)

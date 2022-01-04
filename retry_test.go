@@ -32,10 +32,10 @@ func TestRetry(t *testing.T) {
 		// Test Retry()
 		if err := Retry(retryableFunction, table.maxRetries); err != nil {
 			// Check if error is due to maxRetries limit
-			if serr, ok := err.(*MaxRetryError); ok {
+			if serr, ok := err.(*maxRetryError); ok {
 				// Check if the error was thrown incorrectly
 				if serr.maxRetries != table.maxRetries {
-					t.Errorf("MaxRetryError thrown incorrectly: %s", serr)
+					t.Errorf("maxRetryError thrown incorrectly: %s", serr)
 					continue
 				}
 				// If correct log and continue
