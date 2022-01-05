@@ -6,8 +6,8 @@ import (
 )
 
 type maxRetryError struct {
-	maxRetries	int
-	backoff	time.Duration
+	maxRetries int
+	backoff    time.Duration
 }
 
 func (m *maxRetryError) Error() string {

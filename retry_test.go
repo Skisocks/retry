@@ -9,12 +9,12 @@ import (
 func TestRetry(t *testing.T) {
 	testTable := []struct {
 		functionSuccessOn int
-		Pass	bool
+		Pass              bool
 	}{
 		{4, false}, // MaxRetryFail
-		{3, true}, // Success pre-max retries
-		{3, true}, // Success on max retries
-		{3, true}, // Success (infinite retries)
+		{3, true},  // Success pre-max retries
+		{3, true},  // Success on max retries
+		{3, true},  // Success (infinite retries)
 	}
 
 	config := Config{
@@ -22,7 +22,7 @@ func TestRetry(t *testing.T) {
 		maxBackoff:        0,
 		backoffMultiplier: 2,
 		maxRandomJitter:   1000,
-		initialDelay: 1000,
+		initialDelay:      1000,
 	}
 
 	for testNumber, table := range testTable {

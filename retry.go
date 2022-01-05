@@ -28,7 +28,6 @@ func Retry(function function, cfg Config) error {
 		if retryAttempt == cfg.maxRetries {
 			return &maxRetryError{maxRetries: cfg.maxRetries}
 		}
-
 		log.Printf("function was unsuccessful on attempt: %d\n", retryAttempt)
 
 		// Sleep
