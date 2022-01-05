@@ -41,17 +41,18 @@ func TestRetry(t *testing.T) {
 		// Test Retry()
 		if err := Retry(retryableFunction, config); err != nil {
 			// Check if error is due to maxRetries limit
-			if serr, ok := err.(*maxRetryError); ok {
+			var e *maxRetryError
+			if errors.As(err, &e) {
 				// Check if the error was thrown incorrectly
-				if serr.maxRetries != config.maxRetries {
-					t.Errorf("maxRetryError thrown incorrectly: %s", serr)
+				if err.(*maxRetryError).maxRetries != config.maxRetries {
+					t.Errorf("maxRetryError thrown incorrectly: %s", err)
 					continue
 				}
 				// If correct log and continue
-				log.Printf("max retry error: %s", serr)
+				log.Printf("max retry error: %s", err)
 				continue
 			}
-			// Check if any other errors are thrown
+			// Check if it was a different error
 			t.Errorf("unknown error: %s", err)
 		}
 	}
