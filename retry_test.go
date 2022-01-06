@@ -8,12 +8,21 @@ import (
 
 func TestRetry(t *testing.T) {
 	testTable := []struct {
-		maxRetries int
 		functionSuccessOn int
+		Pass              bool
 	}{
-		{3, 4}, // MaxRetryFail
-		{4, 3}, // Success
-		{0, 3}, // Success (infinite retries)
+		{4, false}, // MaxRetryFail
+		{3, true},  // Success pre-max retries
+		{3, true},  // Success on max retries
+		{3, true},  // Success (infinite retries)
+	}
+
+	config := Config{
+		maxRetries:        5,
+		maxBackoff:        0,
+		backoffMultiplier: 2,
+		maxRandomJitter:   1000,
+		initialDelay:      1000,
 	}
 
 	for testNumber, table := range testTable {
@@ -30,19 +39,20 @@ func TestRetry(t *testing.T) {
 		}
 
 		// Test Retry()
-		if err := Retry(retryableFunction, table.maxRetries); err != nil {
+		if err := Retry(retryableFunction, config); err != nil {
 			// Check if error is due to maxRetries limit
-			if serr, ok := err.(*maxRetryError); ok {
+			var e *maxRetryError
+			if errors.As(err, &e) {
 				// Check if the error was thrown incorrectly
-				if serr.maxRetries != table.maxRetries {
-					t.Errorf("maxRetryError thrown incorrectly: %s", serr)
+				if err.(*maxRetryError).maxRetries != config.maxRetries {
+					t.Errorf("maxRetryError thrown incorrectly: %s", err)
 					continue
 				}
 				// If correct log and continue
-				log.Printf("max retry error: %s", serr)
+				log.Printf("max retry error: %s", err)
 				continue
 			}
-			// Check if any other errors are thrown
+			// Check if it was a different error
 			t.Errorf("unknown error: %s", err)
 		}
 	}
