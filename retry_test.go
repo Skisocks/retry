@@ -17,7 +17,7 @@ func TestRetry(t *testing.T) {
 		{3, true},  // Success (infinite retries)
 	}
 
-	config := Config{
+	policy := Policy{
 		maxRetries:        5,
 		maxBackoff:        0,
 		backoffMultiplier: 2,
@@ -39,12 +39,12 @@ func TestRetry(t *testing.T) {
 		}
 
 		// Test Retry()
-		if err := Retry(retryableFunction, config); err != nil {
+		if err := Retry(retryableFunction, policy); err != nil {
 			// Check if error is due to maxRetries limit
 			var e *maxRetryError
 			if errors.As(err, &e) {
 				// Check if the error was thrown incorrectly
-				if err.(*maxRetryError).maxRetries != config.maxRetries {
+				if err.(*maxRetryError).maxRetries != policy.maxRetries {
 					t.Errorf("maxRetryError thrown incorrectly: %s", err)
 					continue
 				}

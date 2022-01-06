@@ -1,6 +1,6 @@
 package retry
 
-type Config struct {
+type Policy struct {
 	maxRetries        int   // Maximum number of attempts
 	maxBackoff        int   // Maximum backoff time in milliseconds. 0 is no maximum backoff
 	backoffMultiplier int32 // Multiplier added to delay between attempts
@@ -8,14 +8,14 @@ type Config struct {
 	initialDelay      int32 // Delay in milliseconds
 }
 
-func NewConfig(
+func NewPolicy(
 	maxRetries int,
 	maxBackoff int,
 	backoffMultiplier int32,
 	maxRandomJitter int32,
 	initialDelay int32,
-) *Config {
-	return &Config{
+) *Policy {
+	return &Policy{
 		maxRetries:        maxRetries,
 		maxBackoff:        maxBackoff,
 		backoffMultiplier: backoffMultiplier,

@@ -9,7 +9,7 @@ import (
 type function func() error
 
 // Retry calls a function and re-executes it if it fails
-func Retry(function function, cfg Config) error {
+func Retry(function function, cfg Policy) error {
 	var retryAttempt = 1
 	var backoffGrowthRate int32 = 1
 	rand.Seed(time.Now().Unix())
@@ -40,7 +40,7 @@ func Retry(function function, cfg Config) error {
 }
 
 // backoff causes the Retry function to sleep for a period depending on the config settings
-func backoff(cfg Config, backoffMultiplier int32) {
+func backoff(cfg Policy, backoffMultiplier int32) {
 	var backoff time.Duration
 
 	// Add random jitter to the backoff time
