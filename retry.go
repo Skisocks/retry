@@ -8,9 +8,10 @@ import (
 
 type function func() error
 
-// Retry calls a function and re-executes it if it fails
-func Retry(function function, cfg Config) error {
-	var retryAttempt = 1
+// Retry calls a function and re-executes it if it fails.
+// If it does not succeed before Policy.MaxRetries is reached then a maxRetryError is returned.
+func Retry(function function, policy *Policy) error {
+	retryAttempt := 1
 	var backoffGrowthRate int32 = 1
 	rand.Seed(time.Now().Unix())
 
@@ -24,34 +25,34 @@ func Retry(function function, cfg Config) error {
 			return nil
 		}
 
-		// If the function is not successful within maxRetries return maxRetryError
-		if retryAttempt == cfg.maxRetries {
-			return &maxRetryError{maxRetries: cfg.maxRetries}
+		// If the function is not successful within MaxRetries return maxRetryError
+		if retryAttempt == policy.MaxRetries {
+			return &maxRetryError{maxRetries: policy.MaxRetries}
 		}
 		log.Printf("function was unsuccessful on attempt: %d\n", retryAttempt)
 
 		// Sleep
-		backoff(cfg, backoffGrowthRate)
+		backoff(backoffGrowthRate, policy)
 
 		// Exponentially increase the backoff & increment the retry counter
-		backoffGrowthRate *= cfg.backoffMultiplier
+		backoffGrowthRate *= policy.BackoffMultiplier
 		retryAttempt++
 	}
 }
 
-// backoff causes the Retry function to sleep for a period depending on the config settings
-func backoff(cfg Config, backoffMultiplier int32) {
+// backoff causes Retry to sleep for a period depending on the config settings
+func backoff(backoffMultiplier int32, cfg *Policy) {
 	var backoff time.Duration
 
 	// Add random jitter to the backoff time
-	if cfg.maxRandomJitter == 0 {
-		backoff = time.Duration(cfg.initialDelay*backoffMultiplier) * time.Millisecond
+	if cfg.MaxRandomJitter == 0 {
+		backoff = time.Duration(cfg.InitialDelay*backoffMultiplier) * time.Millisecond
 	} else {
-		backoff = time.Duration((rand.Int31n(cfg.maxRandomJitter)+cfg.initialDelay)*backoffMultiplier) * time.Millisecond
+		backoff = time.Duration((rand.Int31n(cfg.MaxRandomJitter)+cfg.InitialDelay)*backoffMultiplier) * time.Millisecond
 	}
 
 	// Limit backoff to the maximum value set in config
-	maxBackoff := time.Duration(cfg.maxBackoff) * time.Millisecond
+	maxBackoff := time.Duration(cfg.MaxBackoff) * time.Millisecond
 	if backoff > maxBackoff && maxBackoff != 0 {
 		backoff = maxBackoff
 	}
