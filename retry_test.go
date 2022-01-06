@@ -9,13 +9,13 @@ import (
 func TestRetry(t *testing.T) {
 	testTable := []struct {
 		functionSuccessOn int
-		policy            *Policy
+		policy            *BackoffPolicy
 		shouldTestPass    bool
 	}{
-		{4, NewPolicy(3, 0, 2, 1000, 1000), false}, // MaxRetryFail
-		{3, NewPolicy(4, 0, 2, 1000, 1000), true},  // Success pre-max retries
-		{3, NewPolicy(3, 0, 2, 1000, 1000), true},  // Success on max retries
-		{3, NewPolicy(0, 0, 2, 1000, 1000), true},  // Success (infinite retries)
+		{4, testingPolicy(3), false}, // MaxRetryFail
+		{3, testingPolicy(4), true},  // Success pre-max retries
+		{3, testingPolicy(3), true},  // Success on max retries
+		{3, testingPolicy(0), true},  // Success (infinite retries)
 	}
 
 	for testNumber, table := range testTable {
@@ -59,4 +59,10 @@ func TestRetry(t *testing.T) {
 			t.Errorf("test should have failed")
 		}
 	}
+}
+
+func testingPolicy(maxRetries int) *BackoffPolicy {
+	policy := NewBackoffPolicy()
+	policy.MaxRetries = maxRetries
+	return policy
 }
