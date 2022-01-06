@@ -1,13 +1,23 @@
 package retry
 
+/*
+Policy contains the back off parameters that this package implements.
+
+MaxRetries: The maximum number of attempts that Retry will make.
+MaxBackoff: The maximum amount of time in milliseconds that Retry will backoff for.
+BackoffMultiplier: The multiplier used to increase the backoff delay exponentially.
+MaxRandomJitter: The maximum value of random jitter added to the delay in milliseconds. 0 is no jitter.
+InitialDelay: The initial delay in milliseconds/
+*/
 type Policy struct {
-	maxRetries        int   // Maximum number of attempts
-	maxBackoff        int   // Maximum backoff time in milliseconds. 0 is no maximum backoff
-	backoffMultiplier int32 // Multiplier added to delay between attempts
-	maxRandomJitter   int32 // Maximum value of random jitter added to the delay in milliseconds. 0 is no jitter.
-	initialDelay      int32 // Delay in milliseconds
+	MaxRetries        int   // Maximum number of attempts
+	MaxBackoff        int   // Maximum backoff time in milliseconds. 0 is no maximum backoff
+	BackoffMultiplier int32 // Multiplier added to delay between attempts
+	MaxRandomJitter   int32 // Maximum value of random jitter added to the delay in milliseconds. 0 is no jitter.
+	InitialDelay      int32 // Delay in milliseconds
 }
 
+// NewPolicy returns a backoff Policy
 func NewPolicy(
 	maxRetries int,
 	maxBackoff int,
@@ -16,10 +26,10 @@ func NewPolicy(
 	initialDelay int32,
 ) *Policy {
 	return &Policy{
-		maxRetries:        maxRetries,
-		maxBackoff:        maxBackoff,
-		backoffMultiplier: backoffMultiplier,
-		maxRandomJitter:   maxRandomJitter,
-		initialDelay:      initialDelay,
+		MaxRetries:        maxRetries,
+		MaxBackoff:        maxBackoff,
+		BackoffMultiplier: backoffMultiplier,
+		MaxRandomJitter:   maxRandomJitter,
+		InitialDelay:      initialDelay,
 	}
 }

@@ -38,11 +38,11 @@ func TestRetry(t *testing.T) {
 			if table.shouldTestPass == true {
 				t.Errorf("test should have passed: %s", err)
 			}
-			// Check if error is due to maxRetries limit
+			// Check if error is due to MaxRetries limit
 			var e *maxRetryError
 			if errors.As(err, &e) {
 				// Check if the error was thrown incorrectly
-				if err.(*maxRetryError).maxRetries != table.policy.maxRetries {
+				if err.(*maxRetryError).maxRetries != table.policy.MaxRetries {
 					t.Errorf("maxRetryError thrown incorrectly: %s", err)
 					continue
 				}
