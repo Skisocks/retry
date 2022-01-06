@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// maxRetryError is an error returned when Retry does not succeed within Policy.MaxRetries
+// maxRetryError is an error returned when Retry does not succeed within BackoffPolicy.MaxRetries
 type maxRetryError struct {
 	maxRetries int
 	backoff    time.Duration

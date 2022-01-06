@@ -9,8 +9,8 @@ import (
 type function func() error
 
 // Retry calls a function and re-executes it if it fails.
-// If it does not succeed before Policy.MaxRetries is reached then a maxRetryError is returned.
-func Retry(function function, policy *Policy) error {
+// If it does not succeed before BackoffPolicy.MaxRetries is reached then a maxRetryError is returned.
+func Retry(function function, policy *BackoffPolicy) error {
 	retryAttempt := 1
 	var backoffGrowthRate int32 = 1
 	rand.Seed(time.Now().Unix())
@@ -41,7 +41,7 @@ func Retry(function function, policy *Policy) error {
 }
 
 // backoff causes Retry to sleep for a period depending on the config settings
-func backoff(backoffMultiplier int32, cfg *Policy) {
+func backoff(backoffMultiplier int32, cfg *BackoffPolicy) {
 	var backoff time.Duration
 
 	// Add random jitter to the backoff time
