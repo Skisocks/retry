@@ -9,8 +9,8 @@ import (
 type function func() error
 
 // Retry calls a function and re-executes it if it fails
-func Retry(function function, cfg Policy) error {
-	var retryAttempt = 1
+func Retry(function function, policy *Policy) error {
+	retryAttempt := 1
 	var backoffGrowthRate int32 = 1
 	rand.Seed(time.Now().Unix())
 
@@ -25,22 +25,22 @@ func Retry(function function, cfg Policy) error {
 		}
 
 		// If the function is not successful within maxRetries return maxRetryError
-		if retryAttempt == cfg.maxRetries {
-			return &maxRetryError{maxRetries: cfg.maxRetries}
+		if retryAttempt == policy.maxRetries {
+			return &maxRetryError{maxRetries: policy.maxRetries}
 		}
 		log.Printf("function was unsuccessful on attempt: %d\n", retryAttempt)
 
 		// Sleep
-		backoff(cfg, backoffGrowthRate)
+		backoff(backoffGrowthRate, policy)
 
 		// Exponentially increase the backoff & increment the retry counter
-		backoffGrowthRate *= cfg.backoffMultiplier
+		backoffGrowthRate *= policy.backoffMultiplier
 		retryAttempt++
 	}
 }
 
 // backoff causes the Retry function to sleep for a period depending on the config settings
-func backoff(cfg Policy, backoffMultiplier int32) {
+func backoff(backoffMultiplier int32, cfg *Policy) {
 	var backoff time.Duration
 
 	// Add random jitter to the backoff time
