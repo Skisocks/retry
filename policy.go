@@ -1,6 +1,12 @@
 package retry
 
-// BackoffPolicy contains the back off parameters that this package implements.
+// BackoffPolicy is a backoff implementation that exponentially increases the delay between retry attempts
+// whilst adding random jitter to each delay. The backoff time is calculated using the formula:
+// Backoff interval =
+//		(RandomJitterRange + InitialDelay) * BackoffGrowthRate
+// If no random jitter is required then the formula is:
+// Backoff interval =
+// 		InitialDelay * BackoffGrowthRate
 type BackoffPolicy struct {
 	MaxRetries        int   // Maximum number of attempts that Retry will make.
 	MaxBackoff        int   // Maximum amount of time in milliseconds that Retry will backoff for.

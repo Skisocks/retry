@@ -1,3 +1,9 @@
+// Package retry implements exponential backoff algorithms to successfully retry functions.
+//
+// Use Retry function with a NewCustomBackoffPolicy to re-execute any retryable function with default parameters.
+// Alternatively you can use NewBackoffPolicy to re-execute with generic parameters for ease of use.
+//
+// This package currently cannot be used with channels.
 package retry
 
 import (
@@ -34,21 +40,21 @@ func Retry(function function, policy *BackoffPolicy) error {
 		// Sleep
 		backoff(backoffGrowthRate, policy)
 
-		// Exponentially increase the backoff & increment the retry counter
+		// Increase the backoff & increment the retry counter
 		backoffGrowthRate *= policy.BackoffMultiplier
 		retryAttempt++
 	}
 }
 
 // backoff causes Retry to sleep for a period depending on the config settings
-func backoff(backoffMultiplier int32, cfg *BackoffPolicy) {
+func backoff(backoffGrowthRate int32, cfg *BackoffPolicy) {
 	var backoff time.Duration
 
 	// Add random jitter to the backoff time
 	if cfg.MaxRandomJitter == 0 {
-		backoff = time.Duration(cfg.InitialDelay*backoffMultiplier) * time.Millisecond
+		backoff = time.Duration(cfg.InitialDelay*backoffGrowthRate) * time.Millisecond
 	} else {
-		backoff = time.Duration((rand.Int31n(cfg.MaxRandomJitter)+cfg.InitialDelay)*backoffMultiplier) * time.Millisecond
+		backoff = time.Duration((rand.Int31n(cfg.MaxRandomJitter)+cfg.InitialDelay)*backoffGrowthRate) * time.Millisecond
 	}
 
 	// Limit backoff to the maximum value set in config
