@@ -13,6 +13,8 @@ import (
 	"gitlab.com/open-source-archie/retry"
 )
 ```
+
+### Quick start
 Wrap the retryable function in an anonymous function and then give that as the first argument.
 
 Use a NewBackoffPolicy to retry with default parameters.
@@ -22,6 +24,8 @@ if err := retry.Retry(retryableFunction, retry.NewBackoffPolicy); err != nil {
     return err
 }
 ```
+
+### Custom Policy
 Or use a NewCustomBackoffPolicy for a policy with custom parameters.
 ```go
 myBackoffPolicy := retry.NewCustomBackoffPolicy(5, 1000, 2, 1000, 500)
