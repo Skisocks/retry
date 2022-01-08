@@ -200,3 +200,28 @@ func BenchmarkCalculateBackoff(b *testing.B) {
 		}
 	}
 }
+
+func ExampleRetry() {
+	// A function that may fail returning an error
+	retryableFunction := func() error { return nil }
+
+	if err := Retry(retryableFunction, NewBackoffPolicy()); err != nil {
+		// Handle error
+		return
+	}
+	// Output:
+}
+
+func ExampleRetry_second() {
+	// A custom backoff policy
+	myPolicy := NewCustomBackoffPolicy(10, 0, 2, 1000, 1000, false)
+
+	// A function that may fail returning an error
+	retryableFunction := func() error { return nil }
+
+	if err := Retry(retryableFunction, myPolicy); err != nil {
+		// Handle error
+		return
+	}
+	// Output:
+}
