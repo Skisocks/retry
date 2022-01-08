@@ -11,18 +11,22 @@ import (
 func TestRetry(t *testing.T) {
 	testTable := []struct {
 		functionSuccessOn int
-		policy            *BackoffPolicy
-		shouldTestPass    bool
+		expectedIsError   bool
 	}{
-		{4, testingPolicy(3), false}, // MaxRetryFail
-		{3, testingPolicy(4), true},  // Success pre-max retries
-		{3, testingPolicy(3), true},  // Success on max retries
-		{3, testingPolicy(0), true},  // Success (infinite retries)
+		{4, true},  // MaxRetryFail 3
+		{2, false}, // Success pre-max retries4
+		{3, false}, // Success on max retries3
 	}
 
-	for testNumber, testCase := range testTable {
-		log.Printf("STARTING TEST %d", testNumber+1)
+	inputPolicy := &BackoffPolicy{
+		MaxRetries:        3,
+		MaxBackoff:        0,
+		BackoffMultiplier: 2,
+		MaxRandomJitter:   1000,
+		InitialDelay:      500,
+	}
 
+	for _, testCase := range testTable {
 		// Create retryable function that succeeds on specific iteration
 		iteration := 0
 		retryableFunction := func() error {
@@ -34,17 +38,17 @@ func TestRetry(t *testing.T) {
 		}
 
 		// Test Retry
-		err := Retry(retryableFunction, testCase.policy)
+		err := Retry(retryableFunction, inputPolicy)
 		if err != nil {
-			// Check if the test should have passed
-			if testCase.shouldTestPass == true {
-				t.Errorf("test should have passed: %s", err)
+			// Check if an error is expected
+			if testCase.expectedIsError == false {
+				t.Errorf("error not expected: %s", err)
 			}
 			// Check if error is due to MaxRetries limit
 			var e *maxRetryError
 			if errors.As(err, &e) {
 				// Check if the error was thrown incorrectly
-				if err.(*maxRetryError).maxRetries != testCase.policy.MaxRetries {
+				if err.(*maxRetryError).maxRetries != inputPolicy.MaxRetries {
 					t.Errorf("maxRetryError thrown incorrectly: %s", err)
 					continue
 				}
@@ -56,9 +60,9 @@ func TestRetry(t *testing.T) {
 			t.Errorf("unknown error: %s", err)
 			continue
 		}
-		// Check if the test should have failed
-		if testCase.shouldTestPass == false {
-			t.Errorf("test should have failed")
+		// Check if an error is expected
+		if testCase.expectedIsError == true {
+			t.Errorf("expected error")
 		}
 	}
 }
