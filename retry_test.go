@@ -1,8 +1,10 @@
 package retry
 
 import (
+	"bytes"
 	"errors"
 	"log"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -132,6 +134,55 @@ func TestCalculateBackoff2(t *testing.T) {
 	}
 }
 
+func TestIsLogging(t *testing.T) {
+	loggingOnPolicy := &BackoffPolicy{
+		MaxRetries:        10,
+		MaxBackoff:        6000,
+		BackoffMultiplier: 2,
+		MaxRandomJitter:   0,
+		InitialDelay:      500,
+		IsLogging:         true,
+	}
+
+	loggingOffPolicy := &BackoffPolicy{
+		MaxRetries:        10,
+		MaxBackoff:        6000,
+		BackoffMultiplier: 2,
+		MaxRandomJitter:   0,
+		InitialDelay:      500,
+		IsLogging:         false,
+	}
+
+	testTable := []struct {
+		testPolicy *BackoffPolicy
+	}{
+		{loggingOnPolicy},
+		{loggingOffPolicy}, // Success on max retries3
+	}
+
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+
+	for _, testCase := range testTable {
+		buf := new(bytes.Buffer)
+		log.SetOutput(buf)
+
+		defer func() {
+			log.SetOutput(os.Stderr)
+		}()
+		isLogging(testCase.testPolicy, "%d %d %d", 1, 2, 3)
+		result := buf.String()
+
+		if testCase.testPolicy.IsLogging == true && result != "1 2 3\n" {
+			t.Errorf("expected (1 2 3) got %s", result)
+			continue
+		}
+
+		if testCase.testPolicy.IsLogging == false && result != "" {
+			t.Errorf("expected () got %s", result)
+		}
+	}
+}
+
 func TestNewCustomBackoffPolicy(t *testing.T) {
 	expectedTestPolicy := &BackoffPolicy{
 		MaxRetries:        10,
@@ -139,6 +190,7 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 		BackoffMultiplier: 2,
 		MaxRandomJitter:   500,
 		InitialDelay:      500,
+		IsLogging:         false,
 	}
 
 	actualTestPolicy := NewCustomBackoffPolicy(10, 6000, 2, 500, 500, false)
