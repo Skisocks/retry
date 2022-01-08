@@ -8,10 +8,9 @@ To install:
 ```
 go get gitlab.com/open-source-archie/retry
 ```
+
 ```go
-import (
-	"gitlab.com/open-source-archie/retry"
-)
+import "gitlab.com/open-source-archie/retry"
 ```
 
 ### Quick start
