@@ -34,6 +34,7 @@ func NewBackoffPolicy() *BackoffPolicy {
 	}
 }
 
+// NewCustomBackoffPolicy returns a BackoffPolicy with custom parameters
 func NewCustomBackoffPolicy(
 	maxRetries int,
 	maxBackoff int,
