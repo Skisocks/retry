@@ -13,6 +13,7 @@ type BackoffPolicy struct {
 	BackoffMultiplier int32 // Multiplier used to increase the backoff delay exponentially.
 	MaxRandomJitter   int32 // Maximum value of random jitter added to the delay in milliseconds. 0 is no jitter.
 	InitialDelay      int32 // Initial delay in milliseconds
+	IsLogging         bool  // Defines whether logging should occur during retries
 }
 
 const (
@@ -21,6 +22,7 @@ const (
 	DefaultBackoffMultiplier int32 = 2
 	DefaultMaxRandomJitter   int32 = 1000
 	DefaultInitialDelay      int32 = 500
+	DefaultIsLogging         bool  = false
 )
 
 // NewBackoffPolicy returns a BackoffPolicy with default parameters
@@ -31,6 +33,7 @@ func NewBackoffPolicy() *BackoffPolicy {
 		BackoffMultiplier: DefaultBackoffMultiplier,
 		MaxRandomJitter:   DefaultMaxRandomJitter,
 		InitialDelay:      DefaultInitialDelay,
+		IsLogging:         DefaultIsLogging,
 	}
 }
 
@@ -41,6 +44,7 @@ func NewCustomBackoffPolicy(
 	backoffMultiplier int32,
 	maxRandomJitter int32,
 	initialDelay int32,
+	isLogging bool,
 ) *BackoffPolicy {
 	return &BackoffPolicy{
 		MaxRetries:        maxRetries,
@@ -48,5 +52,6 @@ func NewCustomBackoffPolicy(
 		BackoffMultiplier: backoffMultiplier,
 		MaxRandomJitter:   maxRandomJitter,
 		InitialDelay:      initialDelay,
+		IsLogging:         isLogging,
 	}
 }

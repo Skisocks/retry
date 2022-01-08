@@ -24,6 +24,7 @@ func TestRetry(t *testing.T) {
 		BackoffMultiplier: 2,
 		MaxRandomJitter:   1000,
 		InitialDelay:      500,
+		IsLogging:         false,
 	}
 
 	for _, testCase := range testTable {
@@ -75,6 +76,7 @@ func TestCalculateBackoff(t *testing.T) {
 		BackoffMultiplier: 2,
 		MaxRandomJitter:   0,
 		InitialDelay:      500,
+		IsLogging:         false,
 	}
 
 	expectedResults := []time.Duration{500, 1000, 2000, 4000, 6000, 6000, 6000}
@@ -139,9 +141,9 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 		InitialDelay:      500,
 	}
 
-	actualTestPolicy := NewCustomBackoffPolicy(10, 6000, 2, 500, 500)
+	actualTestPolicy := NewCustomBackoffPolicy(10, 6000, 2, 500, 500, false)
 	if reflect.DeepEqual(actualTestPolicy, expectedTestPolicy) == false {
-		t.Errorf("got: %d, expected: %d", *actualTestPolicy, *expectedTestPolicy)
+		t.Errorf("got: %+v, expected: %+v", *actualTestPolicy, *expectedTestPolicy)
 	}
 }
 
@@ -152,16 +154,11 @@ func TestNewBackoffPolicy(t *testing.T) {
 		BackoffMultiplier: 2,
 		MaxRandomJitter:   1000,
 		InitialDelay:      500,
+		IsLogging:         false,
 	}
 
 	actualTestPolicy := NewBackoffPolicy()
 	if reflect.DeepEqual(actualTestPolicy, expectedTestPolicy) == false {
-		t.Errorf("got: %d, expected: %d", *actualTestPolicy, *expectedTestPolicy)
+		t.Errorf("got: %+v, expected: %+v", *actualTestPolicy, *expectedTestPolicy)
 	}
-}
-
-func testingPolicy(maxRetries int) *BackoffPolicy {
-	policy := NewBackoffPolicy()
-	policy.MaxRetries = maxRetries
-	return policy
 }

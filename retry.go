@@ -27,7 +27,7 @@ func Retry(function function, policy *BackoffPolicy) error {
 			if retryAttempt == 1 {
 				return nil
 			}
-			log.Printf("function was sucsessful on attempt: %d\n", retryAttempt)
+			isLogging(policy, "function was successful on attempt: %d\n", retryAttempt)
 			return nil
 		}
 
@@ -35,7 +35,7 @@ func Retry(function function, policy *BackoffPolicy) error {
 		if retryAttempt == policy.MaxRetries {
 			return &maxRetryError{maxRetries: policy.MaxRetries}
 		}
-		log.Printf("function was unsuccessful on attempt: %d\n", retryAttempt)
+		isLogging(policy, "function was unsuccessful on attempt: %d\n", retryAttempt)
 
 		// Sleep
 		time.Sleep(calculateBackoff(backoffGrowthRate, policy))
@@ -47,22 +47,28 @@ func Retry(function function, policy *BackoffPolicy) error {
 }
 
 // calculateBackoff causes Retry to sleep for a period depending on the config settings
-func calculateBackoff(backoffGrowthRate int32, cfg *BackoffPolicy) time.Duration {
+func calculateBackoff(backoffGrowthRate int32, policy *BackoffPolicy) time.Duration {
 	var backoff time.Duration
 
 	// Add random jitter to the backoff time
-	if cfg.MaxRandomJitter == 0 {
-		backoff = time.Duration(cfg.InitialDelay*backoffGrowthRate) * time.Millisecond
+	if policy.MaxRandomJitter == 0 {
+		backoff = time.Duration(policy.InitialDelay*backoffGrowthRate) * time.Millisecond
 	} else {
-		backoff = time.Duration((rand.Int31n(cfg.MaxRandomJitter)+cfg.InitialDelay)*backoffGrowthRate) * time.Millisecond
+		backoff = time.Duration((rand.Int31n(policy.MaxRandomJitter)+policy.InitialDelay)*backoffGrowthRate) * time.Millisecond
 	}
 
 	// Limit backoff to the maximum value set in config
-	maxBackoff := time.Duration(cfg.MaxBackoff) * time.Millisecond
+	maxBackoff := time.Duration(policy.MaxBackoff) * time.Millisecond
 	if backoff > maxBackoff && maxBackoff != 0 {
 		backoff = maxBackoff
 	}
 
-	log.Printf("backoff: %d", backoff/time.Millisecond)
+	isLogging(policy, "backoff: %d", backoff/time.Millisecond)
 	return backoff
+}
+
+func isLogging(policy *BackoffPolicy, format string, params ...interface{}) {
+	if policy.IsLogging == true {
+		log.Printf(format, params...)
+	}
 }
