@@ -8,68 +8,6 @@ import (
 	"time"
 )
 
-// TestBackoff tests for expected results with no jitter
-func TestCalculateBackoff(t *testing.T) {
-	// Test without jitter
-	testPolicy := &BackoffPolicy{
-		MaxRetries:        10,
-		MaxBackoff:        6000,
-		BackoffMultiplier: 2,
-		MaxRandomJitter:   0,
-		InitialDelay:      500,
-	}
-
-	expectedResults := []time.Duration{500, 1000, 2000, 4000, 6000, 6000, 6000}
-	for testNumber, expectedBackoff := range expectedResults {
-		expectedResults[testNumber] = expectedBackoff * time.Millisecond
-	}
-
-	var backoffGrowthRate int32 = 1
-
-	for _, expectedBackoff := range expectedResults {
-		actualBackoff := calculateBackoff(backoffGrowthRate, testPolicy)
-		if actualBackoff != expectedBackoff {
-			t.Errorf("got: %d, expected: %d", actualBackoff, expectedBackoff)
-		}
-		backoffGrowthRate *= testPolicy.BackoffMultiplier
-	}
-
-	// Test with jitter
-	testPolicy = &BackoffPolicy{
-		MaxRetries:        10,
-		MaxBackoff:        6000,
-		BackoffMultiplier: 2,
-		MaxRandomJitter:   0,
-		InitialDelay:      500,
-	}
-
-	expectedJitterResults := [][]time.Duration{
-		{500, 1000}, // {minBackoff, maxBackoff}
-		{1000, 2000},
-		{2000, 4000},
-		{4000, 8000},
-		{8000, 10000},
-		{10000, 10000},
-		{10000, 10000},
-	}
-	for _, expectedBackoffRange := range expectedJitterResults {
-		for testNumber, expectedValue := range expectedBackoffRange {
-			expectedBackoffRange[testNumber] = expectedValue * time.Millisecond
-		}
-	}
-
-	backoffGrowthRate = 1
-
-	for _, expectedBackoff := range expectedJitterResults {
-		actualBackoff := calculateBackoff(backoffGrowthRate, testPolicy)
-		if actualBackoff < expectedBackoff[0] && actualBackoff > expectedBackoff[1] {
-			t.Errorf("got: %d, expected: %d", actualBackoff, expectedBackoff)
-		}
-
-		backoffGrowthRate *= testPolicy.BackoffMultiplier
-	}
-}
-
 func TestRetry(t *testing.T) {
 	testTable := []struct {
 		functionSuccessOn int
@@ -122,6 +60,69 @@ func TestRetry(t *testing.T) {
 		if testCase.shouldTestPass == false {
 			t.Errorf("test should have failed")
 		}
+	}
+}
+
+// TestCalculateBackoff tests calculateBackoff without random jitter
+func TestCalculateBackoff(t *testing.T) {
+	testPolicy := &BackoffPolicy{
+		MaxRetries:        10,
+		MaxBackoff:        6000,
+		BackoffMultiplier: 2,
+		MaxRandomJitter:   0,
+		InitialDelay:      500,
+	}
+
+	expectedResults := []time.Duration{500, 1000, 2000, 4000, 6000, 6000, 6000}
+	for testNumber, expectedBackoff := range expectedResults {
+		expectedResults[testNumber] = expectedBackoff * time.Millisecond
+	}
+
+	var backoffGrowthRate int32 = 1
+
+	for _, expectedBackoff := range expectedResults {
+		actualBackoff := calculateBackoff(backoffGrowthRate, testPolicy)
+		if actualBackoff != expectedBackoff {
+			t.Errorf("got: %d, expected: %d", actualBackoff, expectedBackoff)
+		}
+		backoffGrowthRate *= testPolicy.BackoffMultiplier
+	}
+}
+
+// TestCalculateBackoff2 tests calculateBackoff with random jitter
+func TestCalculateBackoff2(t *testing.T) {
+	testPolicy := &BackoffPolicy{
+		MaxRetries:        10,
+		MaxBackoff:        6000,
+		BackoffMultiplier: 2,
+		MaxRandomJitter:   500,
+		InitialDelay:      500,
+	}
+
+	expectedJitterResults := [][]time.Duration{
+		{500, 1000}, // {minBackoff, maxBackoff}
+		{1000, 2000},
+		{2000, 4000},
+		{4000, 8000},
+		{8000, 10000},
+		{10000, 10000},
+		{10000, 10000},
+	}
+	for _, expectedBackoffRange := range expectedJitterResults {
+		for testNumber, expectedValue := range expectedBackoffRange {
+			expectedBackoffRange[testNumber] = expectedValue * time.Millisecond
+		}
+	}
+
+	var backoffGrowthRate int32 = 1
+
+	for _, expectedBackoff := range expectedJitterResults {
+		actualBackoff := calculateBackoff(backoffGrowthRate, testPolicy)
+		if actualBackoff < expectedBackoff[0] && actualBackoff > expectedBackoff[1] {
+			t.Errorf("got: %d, expected: %d", actualBackoff, expectedBackoff)
+		}
+
+		backoffGrowthRate *= testPolicy.BackoffMultiplier
 	}
 }
 
