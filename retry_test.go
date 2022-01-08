@@ -214,3 +214,22 @@ func TestNewBackoffPolicy(t *testing.T) {
 		t.Errorf("got: %+v, expected: %+v", *actualTestPolicy, *expectedTestPolicy)
 	}
 }
+
+func BenchmarkCalculateBackoff(b *testing.B) {
+	benchmarkPolicy := &BackoffPolicy{
+		MaxRetries:        10,
+		MaxBackoff:        0,
+		BackoffMultiplier: 2,
+		MaxRandomJitter:   1000,
+		InitialDelay:      500,
+		IsLogging:         false,
+	}
+
+	for i := 0; i < b.N; i++ {
+		var backoffGrowthRate int32 = 1
+		for i := 0; i <= benchmarkPolicy.MaxRetries; i++ {
+			calculateBackoff(backoffGrowthRate, benchmarkPolicy)
+			backoffGrowthRate *= benchmarkPolicy.BackoffMultiplier
+		}
+	}
+}
