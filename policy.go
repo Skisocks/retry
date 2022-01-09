@@ -45,7 +45,23 @@ func NewCustomBackoffPolicy(
 	maxRandomJitter int32,
 	initialDelay int32,
 	isLogging bool,
-) *BackoffPolicy {
+) (*BackoffPolicy, error) {
+	if maxRetries < 0 {
+		return nil, &inputError{err: "maxRetries cannot be negative"}
+	}
+	if maxBackoff < 0 {
+		return nil, &inputError{err: "maxBackoff cannot be negative"}
+	}
+	if backoffMultiplier <= 0 {
+		return nil, &inputError{err: "backoff multiplier must be a positive integer"}
+	}
+	if maxRandomJitter < 0 {
+		return nil, &inputError{err: "maxRandomJitter cannot be negative"}
+	}
+	if initialDelay < 0 {
+		return nil, &inputError{err: "initialDelay cannot be negative"}
+	}
+
 	return &BackoffPolicy{
 		MaxRetries:        maxRetries,
 		MaxBackoff:        maxBackoff,
@@ -53,5 +69,5 @@ func NewCustomBackoffPolicy(
 		MaxRandomJitter:   maxRandomJitter,
 		InitialDelay:      initialDelay,
 		IsLogging:         isLogging,
-	}
+	}, nil
 }
