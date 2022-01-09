@@ -54,8 +54,7 @@ func TestRetry(t *testing.T) {
 					t.Errorf("maxRetryError thrown incorrectly: %s", err)
 					continue
 				}
-				// If correct log and continue
-				log.Printf("max retry error: %s", err)
+				// If correct continue
 				continue
 			}
 			// Check if it was an unknown error
@@ -113,12 +112,12 @@ func TestCalculateBackoff(t *testing.T) {
 			&BackoffPolicy{
 				MaxRetries:        0,
 				MaxBackoff:        27000,
-				BackoffMultiplier: 0,
+				BackoffMultiplier: 1,
 				MaxRandomJitter:   0,
 				InitialDelay:      1000,
 				IsLogging:         false,
 			},
-			[]time.Duration{1000, 2000, 3000, 4000, 5000, 6000, 7000},
+			[]time.Duration{1000, 1000, 1000, 1000, 1000, 1000, 1000},
 		},
 	}
 
