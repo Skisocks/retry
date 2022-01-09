@@ -8,20 +8,22 @@ import (
 
 func TestNewCustomBackoffPolicy(t *testing.T) {
 	testCases := []struct {
-		testName               string
+		name string
+
 		inputMaxRetries        int
 		inputMaxBackoff        int
 		inputBackoffMultiplier int32
 		inputMaxRandomJitter   int32
 		inputInitialDelay      int32
 		inputIsLogging         bool
-		expectedPolicy         *BackoffPolicy
-		errIsExpected          bool
+
+		expectedPolicy *BackoffPolicy
+		errIsExpected  bool
 	}{
 		{
-			"base",
-			10, 6000, 2, 500, 500, false,
-			&BackoffPolicy{
+			name:            "base",
+			inputMaxRetries: 10, inputMaxBackoff: 6000, inputBackoffMultiplier: 2, inputMaxRandomJitter: 500, inputInitialDelay: 500,
+			expectedPolicy: &BackoffPolicy{
 				MaxRetries:        10,
 				MaxBackoff:        6000,
 				BackoffMultiplier: 2,
@@ -29,42 +31,36 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 				InitialDelay:      500,
 				IsLogging:         false,
 			},
-			false,
 		},
 		{
-			"neg MaxRetries",
-			-1, 6000, 2, 500, 500, false,
-			nil,
-			true,
+			name:            "neg MaxRetries",
+			inputMaxRetries: -1, inputMaxBackoff: 6000, inputBackoffMultiplier: 2, inputMaxRandomJitter: 500, inputInitialDelay: 500,
+			errIsExpected: true,
 		},
 		{
-			"neg maxBackoff",
-			10, -1, 2, 500, 500, false,
-			nil,
-			true,
+			name:            "neg maxBackoff",
+			inputMaxRetries: 10, inputMaxBackoff: -1, inputBackoffMultiplier: 2, inputMaxRandomJitter: 500, inputInitialDelay: 500,
+			errIsExpected: true,
 		},
 		{
-			"neg BackoffMultiplier",
-			10, 6000, -1, 500, 500, false,
-			nil,
-			true,
+			name:            "neg BackoffMultiplier",
+			inputMaxRetries: 10, inputMaxBackoff: 6000, inputBackoffMultiplier: -1, inputMaxRandomJitter: 500, inputInitialDelay: 500,
+			errIsExpected: true,
 		},
 		{
-			"neg RandomJitter",
-			10, 6000, 2, -1, 500, false,
-			nil,
-			true,
+			name:            "neg RandomJitter",
+			inputMaxRetries: 10, inputMaxBackoff: 6000, inputBackoffMultiplier: 2, inputMaxRandomJitter: -1, inputInitialDelay: 500,
+			errIsExpected: true,
 		},
 		{
-			"neg InitialDelay",
-			10, 6000, 2, 500, -1, false,
-			nil,
-			true,
+			name:            "neg InitialDelay",
+			inputMaxRetries: 10, inputMaxBackoff: 6000, inputBackoffMultiplier: 2, inputMaxRandomJitter: 500, inputInitialDelay: -1,
+			errIsExpected: true,
 		},
 	}
 
 	for _, testCase := range testCases {
-		testName := fmt.Sprintf("%s test", testCase.testName)
+		testName := fmt.Sprintf("%s test", testCase.name)
 
 		t.Run(testName, func(t *testing.T) {
 			actualTestPolicy, err := NewCustomBackoffPolicy(
