@@ -18,19 +18,26 @@ Wrap the retryable function in an anonymous function and then give that as the f
 
 Use a NewBackoffPolicy to retry with default parameters.
 ```go
-retryableFunction := func() error { return SomeReallyCoolFunction() }
+retryableFunction := func() error { return SomeCoolFunction() }
 if err := retry.Retry(retryableFunction, retry.NewBackoffPolicy); err != nil {
-    return err
+    // Handle error
+	return err
 }
 ```
 
 ### Custom Policy
 Or use a NewCustomBackoffPolicy for a policy with custom parameters.
 ```go
-myBackoffPolicy := retry.NewCustomBackoffPolicy(5, 1000, 2, 1000, 500)
+myBackoffPolicy, err := retry.NewCustomBackoffPolicy(5, 1000, 2, 1000, 500, false)
+if err != nil {
+	// Handle error
+	return err
+}
+
 retryableFunction := func() error { return SomeReallyCoolFunction() }
 if err := retry.Retry(retryableFunction, myBackoffPolicy); err != nil {
-return err
+    // Handle error
+	return err
 }
 ```
 
