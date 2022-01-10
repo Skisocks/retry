@@ -17,8 +17,8 @@ func TestRetry(t *testing.T) {
 		expectedIsError   bool
 	}{
 		{name: "max retry error", functionSuccessOn: 4, expectedIsError: true},
-		{name: "success pre-max retry", functionSuccessOn: 2},
-		{name: "success on max retry", functionSuccessOn: 3},
+		{name: "success pre-max retry", functionSuccessOn: 2, expectedIsError: false},
+		{name: "success on max retry", functionSuccessOn: 3, expectedIsError: false},
 	}
 
 	inputPolicy := &BackoffPolicy{
@@ -42,7 +42,6 @@ func TestRetry(t *testing.T) {
 		}
 
 		testName := fmt.Sprintf("%s test", testCase.name)
-
 		t.Run(testName, func(t *testing.T) {
 			// Test Retry
 			err := Retry(retryableFunction, inputPolicy)
@@ -59,7 +58,7 @@ func TestRetry(t *testing.T) {
 						t.Errorf("maxRetryError thrown incorrectly: %s", err)
 						return
 					}
-					// If correct continue
+					// If thrown correctly return
 					return
 				}
 				// Check if it was an unknown error
@@ -81,7 +80,7 @@ func TestCalculateBackoff(t *testing.T) {
 		inputPolicy     *BackoffPolicy
 		expectedBackoff []time.Duration
 	}{
-		{ // Base test
+		{
 			name: "base",
 			inputPolicy: &BackoffPolicy{
 				MaxRetries:        0,
@@ -134,17 +133,17 @@ func TestCalculateBackoff(t *testing.T) {
 
 	for _, testCase := range testCases {
 		var backoffGrowthRate int32 = 1
-
 		testName := fmt.Sprintf("%s test", testCase.name)
-
 		t.Run(testName, func(t *testing.T) {
 			for _, expectedBackoff := range testCase.expectedBackoff {
+				// Convert milliseconds to nanoseconds
 				expectedBackoff = expectedBackoff * time.Millisecond
 
 				actualBackoff := calculateBackoff(backoffGrowthRate, testCase.inputPolicy)
 				if actualBackoff != expectedBackoff {
 					t.Errorf("got: %d, expected: %d", actualBackoff/time.Millisecond, expectedBackoff/time.Millisecond)
 				}
+
 				backoffGrowthRate *= testCase.inputPolicy.BackoffMultiplier
 			}
 		})
@@ -170,6 +169,7 @@ func TestCalculateBackoff2(t *testing.T) {
 		{10000, 10000},
 		{10000, 10000},
 	}
+	// Convert milliseconds to nanoseconds
 	for _, expectedBackoffRange := range expectedJitterResults {
 		for backoffNumber, expectedValue := range expectedBackoffRange {
 			expectedBackoffRange[backoffNumber] = expectedValue * time.Millisecond
@@ -177,7 +177,6 @@ func TestCalculateBackoff2(t *testing.T) {
 	}
 
 	var backoffGrowthRate int32 = 1
-
 	for _, expectedBackoff := range expectedJitterResults {
 		actualBackoff := calculateBackoff(backoffGrowthRate, inputPolicy)
 		if actualBackoff < expectedBackoff[0] && actualBackoff > expectedBackoff[1] {
@@ -217,11 +216,11 @@ func TestIsLogging(t *testing.T) {
 		},
 	}
 
+	// Remove date-time flag from logs for simple comparison
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 	for _, testCase := range testCases {
 		testName := fmt.Sprintf("%s test", testCase.name)
-
 		t.Run(testName, func(t *testing.T) {
 			buf := new(bytes.Buffer)
 			log.SetOutput(buf)
@@ -285,7 +284,6 @@ func BenchmarkCalculateBackoff(b *testing.B) {
 func ExampleRetry() {
 	// A function that may fail returning an error
 	retryableFunction := func() error { return nil }
-
 	if err := Retry(retryableFunction, NewBackoffPolicy()); err != nil {
 		// Handle error
 		return
@@ -303,7 +301,6 @@ func ExampleRetry_second() {
 
 	// A function that may fail returning an error
 	retryableFunction := func() error { return nil }
-
 	if err := Retry(retryableFunction, myPolicy); err != nil {
 		// Handle error
 		return

@@ -46,7 +46,7 @@ func Retry(function function, policy *BackoffPolicy) error {
 	}
 }
 
-// calculateBackoff causes Retry to sleep for a period depending on the config settings
+// calculateBackoff returns the next backoff interval that Retry should sleep for depending on the policy variables
 func calculateBackoff(backoffGrowthRate int32, policy *BackoffPolicy) time.Duration {
 	var backoff time.Duration
 
@@ -67,6 +67,7 @@ func calculateBackoff(backoffGrowthRate int32, policy *BackoffPolicy) time.Durat
 	return backoff
 }
 
+// isLogging logs format with parameters if logging has been selected in the policy
 func isLogging(policy *BackoffPolicy, format string, params ...interface{}) {
 	if policy.IsLogging == true {
 		log.Printf(format, params...)

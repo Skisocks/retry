@@ -15,7 +15,7 @@ func (m *maxRetryError) Error() string {
 	return fmt.Sprintf("function was not successful before max retries, failed after %d attempts", m.maxRetries)
 }
 
-// maxRetryError is an error returned when the input of a function is invalid
+// inputError is an error returned when the input of a function is invalid
 type inputError struct {
 	err string
 }
