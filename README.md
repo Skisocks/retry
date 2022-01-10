@@ -1,4 +1,5 @@
-# open-source-archie/retry [![GitLab pipeline](https://img.shields.io/gitlab/pipeline/open-source-archie/retry)](https://gitlab.com/open-source-archie/retry/builds) [![Go Report Card](https://goreportcard.com/badge/gitlab.com/open-source-archie/retry)](https://goreportcard.com/report/gitlab.com/open-source-archie/retry) ![MIT licence](https://img.shields.io/badge/license-MIT-green) [![Go Reference](https://pkg.go.dev/badge/gitlab.com/open-source-archie/retry.svg)](https://pkg.go.dev/gitlab.com/open-source-archie/retry)
+# <img src="https://img.icons8.com/external-vitaliy-gorbachev-lineal-color-vitaly-gorbachev/60/000000/external-reload-arrows-vitaliy-gorbachev-lineal-color-vitaly-gorbachev-1.png" width="30"/> Retry [![GitLab pipeline](https://img.shields.io/gitlab/pipeline/open-source-archie/retry)](https://gitlab.com/open-source-archie/retry/builds) [![Go Report Card](https://goreportcard.com/badge/gitlab.com/open-source-archie/retry)](https://goreportcard.com/report/gitlab.com/open-source-archie/retry) ![MIT licence](https://img.shields.io/badge/license-MIT-green) [![Go Reference](https://pkg.go.dev/badge/gitlab.com/open-source-archie/retry.svg)](https://pkg.go.dev/gitlab.com/open-source-archie/retry)
+
 A simple Go retry package.
 
 Use the Retry function with a custom backoff policy to re-execute any retryable function with custom parameters.
@@ -43,3 +44,5 @@ if err := retry.Retry(retryableFunction, myBackoffPolicy); err != nil {
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+<a target="_blank" href="https://icons8.com/icon/57Gd8pKUv4bp/reload">Reload</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
