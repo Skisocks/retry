@@ -132,7 +132,7 @@ func TestCalculateBackoff(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		var backoffGrowthRate int32 = 1
+		var backoffGrowthRate float32 = 1
 		testName := fmt.Sprintf("%s test", testCase.name)
 		t.Run(testName, func(t *testing.T) {
 			for _, expectedBackoff := range testCase.expectedBackoff {
@@ -161,7 +161,7 @@ func TestCalculateBackoff2(t *testing.T) {
 	}
 
 	expectedJitterResults := [][]time.Duration{
-		{500, 1000}, // {minBackoff, maxBackoff}
+		{500, 1000}, // {min backoff, max backoff}
 		{1000, 2000},
 		{2000, 4000},
 		{4000, 8000},
@@ -176,7 +176,7 @@ func TestCalculateBackoff2(t *testing.T) {
 		}
 	}
 
-	var backoffGrowthRate int32 = 1
+	var backoffGrowthRate float32 = 1
 	for _, expectedBackoff := range expectedJitterResults {
 		actualBackoff := calculateBackoff(backoffGrowthRate, inputPolicy)
 		if actualBackoff < expectedBackoff[0] && actualBackoff > expectedBackoff[1] {
@@ -273,7 +273,7 @@ func BenchmarkCalculateBackoff(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		var backoffGrowthRate int32 = 1
+		var backoffGrowthRate float32 = 1
 		for i := 0; i <= benchmarkPolicy.MaxRetries; i++ {
 			calculateBackoff(backoffGrowthRate, benchmarkPolicy)
 			backoffGrowthRate *= benchmarkPolicy.BackoffMultiplier

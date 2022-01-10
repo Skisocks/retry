@@ -18,7 +18,7 @@ type function func() error
 // If it does not succeed before BackoffPolicy.MaxRetries is reached then a maxRetryError is returned.
 func Retry(function function, policy *BackoffPolicy) error {
 	retryAttempt := 1
-	var backoffGrowthRate int32 = 1
+	var backoffGrowthRate float32 = 1
 	rand.Seed(time.Now().Unix())
 
 	for {
@@ -47,14 +47,18 @@ func Retry(function function, policy *BackoffPolicy) error {
 }
 
 // calculateBackoff returns the next backoff interval that Retry should sleep for depending on the policy variables
-func calculateBackoff(backoffGrowthRate int32, policy *BackoffPolicy) time.Duration {
+func calculateBackoff(backoffGrowthRate float32, policy *BackoffPolicy) time.Duration {
 	var backoff time.Duration
 
+	// Convert int to float32
+	initialDelay := float32(policy.InitialDelay)
+	maxRandomJitter := rand.Float32() * float32(policy.MaxRandomJitter)
+
 	// Add random jitter to the backoff time
-	if policy.MaxRandomJitter == 0 {
-		backoff = time.Duration(policy.InitialDelay*backoffGrowthRate) * time.Millisecond
+	if maxRandomJitter == 0 {
+		backoff = time.Duration(initialDelay*backoffGrowthRate) * time.Millisecond
 	} else {
-		backoff = time.Duration((rand.Int31n(policy.MaxRandomJitter)+policy.InitialDelay)*backoffGrowthRate) * time.Millisecond
+		backoff = time.Duration((maxRandomJitter+initialDelay)*backoffGrowthRate) * time.Millisecond
 	}
 
 	// Limit backoff to the maximum value set in config

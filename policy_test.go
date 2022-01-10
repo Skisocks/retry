@@ -12,7 +12,7 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 
 		inputMaxRetries        int
 		inputMaxBackoff        int
-		inputBackoffMultiplier int32
+		inputBackoffMultiplier float32
 		inputMaxRandomJitter   int32
 		inputInitialDelay      int32
 		inputIsLogging         bool
