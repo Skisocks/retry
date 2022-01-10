@@ -34,7 +34,7 @@ if err != nil {
 	return err
 }
 
-retryableFunction := func() error { return SomeReallyCoolFunction() }
+retryableFunction := func() error { return SomeCoolFunction() }
 if err := retry.Retry(retryableFunction, myBackoffPolicy); err != nil {
     // Handle error
 	return err
