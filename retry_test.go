@@ -47,7 +47,7 @@ func TestRetry(t *testing.T) {
 			err := Retry(retryableFunction, inputPolicy)
 			if err != nil {
 				// Check if an error is expected
-				if testCase.expectedIsError == false {
+				if !testCase.expectedIsError {
 					t.Errorf("error not expected: %s", err)
 				}
 				// Check if error is due to MaxRetries limit
@@ -66,7 +66,7 @@ func TestRetry(t *testing.T) {
 				return
 			}
 			// Check if an error is expected
-			if testCase.expectedIsError == true {
+			if testCase.expectedIsError {
 				t.Errorf("expected error")
 			}
 		})
@@ -231,12 +231,14 @@ func TestIsLogging(t *testing.T) {
 			isLogging(testCase.testPolicy, "%d %d %d", 1, 2, 3)
 			result := buf.String()
 
-			if testCase.testPolicy.IsLogging == true && result != "1 2 3\n" {
+			// Check if IsLogging == true and whether logging occurred
+			if testCase.testPolicy.IsLogging && result != "1 2 3\n" {
 				t.Errorf("expected (1 2 3) got %s", result)
 				return
 			}
 
-			if testCase.testPolicy.IsLogging == false && result != "" {
+			// Check if IsLogging == false and whether logging occurred
+			if !testCase.testPolicy.IsLogging && result != "" {
 				t.Errorf("expected () got %s", result)
 			}
 		})

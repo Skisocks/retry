@@ -48,32 +48,32 @@ func Retry(function function, policy *BackoffPolicy) error {
 
 // calculateBackoff returns the next backoff interval that Retry should sleep for depending on the policy variables
 func calculateBackoff(backoffGrowthRate float32, policy *BackoffPolicy) time.Duration {
-	var backoff time.Duration
+	var currentBackoff time.Duration
 
 	// Convert int to float32
 	initialDelay := float32(policy.InitialDelay)
 	maxRandomJitter := rand.Float32() * float32(policy.MaxRandomJitter)
 
-	// Add random jitter to the backoff time
+	// Add random jitter to the currentBackoff time
 	if maxRandomJitter == 0 {
-		backoff = time.Duration(initialDelay*backoffGrowthRate) * time.Millisecond
+		currentBackoff = time.Duration(initialDelay*backoffGrowthRate) * time.Millisecond
 	} else {
-		backoff = time.Duration((maxRandomJitter+initialDelay)*backoffGrowthRate) * time.Millisecond
+		currentBackoff = time.Duration((maxRandomJitter+initialDelay)*backoffGrowthRate) * time.Millisecond
 	}
 
-	// Limit backoff to the maximum value set in config
+	// Limit currentBackoff to the maximum value set in config
 	maxBackoff := time.Duration(policy.MaxBackoff) * time.Millisecond
-	if backoff > maxBackoff && maxBackoff != 0 {
-		backoff = maxBackoff
+	if currentBackoff > maxBackoff && maxBackoff != 0 {
+		currentBackoff = maxBackoff
 	}
 
-	isLogging(policy, "backoff: %d", backoff/time.Millisecond)
-	return backoff
+	isLogging(policy, "currentBackoff: %d", currentBackoff/time.Millisecond)
+	return currentBackoff
 }
 
 // isLogging logs format with parameters if logging has been selected in the policy
 func isLogging(policy *BackoffPolicy, format string, params ...interface{}) {
-	if policy.IsLogging == true {
+	if policy.IsLogging {
 		log.Printf(format, params...)
 	}
 }

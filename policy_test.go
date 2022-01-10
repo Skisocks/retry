@@ -72,13 +72,13 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 				testCase.inputIsLogging,
 			)
 			if err != nil {
-				if testCase.errIsExpected == false {
+				if !testCase.errIsExpected {
 					t.Errorf("got: %+v, expected: No Error", err)
 				}
 				return
 			}
 
-			if reflect.DeepEqual(actualTestPolicy, testCase.expectedPolicy) == false {
+			if !reflect.DeepEqual(actualTestPolicy, testCase.expectedPolicy) {
 				t.Errorf("got: %+v, expected: %+v", *actualTestPolicy, *testCase.expectedPolicy)
 			}
 		})
@@ -96,7 +96,7 @@ func TestNewBackoffPolicy(t *testing.T) {
 	}
 
 	actualTestPolicy := NewBackoffPolicy()
-	if reflect.DeepEqual(actualTestPolicy, expectedTestPolicy) == false {
+	if !reflect.DeepEqual(actualTestPolicy, expectedTestPolicy) {
 		t.Errorf("got: %+v, expected: %+v", *actualTestPolicy, *expectedTestPolicy)
 	}
 }
