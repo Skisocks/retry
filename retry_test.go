@@ -133,7 +133,7 @@ func TestCalculateBackoff(t *testing.T) {
 
 	for _, testCase := range testCases {
 		var backoffGrowthRate float32 = 1
-		testName := fmt.Sprintf("%s test", testCase.name)
+		testName := fmt.Sprintf("without jitter: %s test", testCase.name)
 		t.Run(testName, func(t *testing.T) {
 			for _, expectedBackoff := range testCase.expectedBackoff {
 				// Convert milliseconds to nanoseconds
@@ -175,16 +175,18 @@ func TestCalculateBackoff2(t *testing.T) {
 			expectedBackoffRange[backoffNumber] = expectedValue * time.Millisecond
 		}
 	}
+	testName := "with jitter"
+	t.Run(testName, func(t *testing.T) {
+		var backoffGrowthRate float32 = 1
+		for _, expectedBackoff := range expectedJitterResults {
+			actualBackoff := calculateBackoff(backoffGrowthRate, inputPolicy)
+			if actualBackoff < expectedBackoff[0] && actualBackoff > expectedBackoff[1] {
+				t.Errorf("got: %d, expected: %d", actualBackoff, expectedBackoff)
+			}
 
-	var backoffGrowthRate float32 = 1
-	for _, expectedBackoff := range expectedJitterResults {
-		actualBackoff := calculateBackoff(backoffGrowthRate, inputPolicy)
-		if actualBackoff < expectedBackoff[0] && actualBackoff > expectedBackoff[1] {
-			t.Errorf("got: %d, expected: %d", actualBackoff, expectedBackoff)
+			backoffGrowthRate *= inputPolicy.BackoffMultiplier
 		}
-
-		backoffGrowthRate *= inputPolicy.BackoffMultiplier
-	}
+	})
 }
 
 func TestIsLogging(t *testing.T) {
