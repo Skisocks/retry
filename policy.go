@@ -1,13 +1,23 @@
 package retry
 
-// BackoffPolicy is a backoff implementation that exponentially increases the delay between retry attempts
+import (
+	"time"
+)
+
+type Policy struct {
+	Settings *settings
+
+	interval time.Duration
+}
+
+// settings is a backoff implementation that exponentially increases the delay between retry attempts
 // whilst adding random jitter to each delay. The backoff time is calculated using the formula:
 // Backoff interval =
 //		(RandomJitterRange + InitialDelay) * BackoffGrowthRate
 // If no random jitter is required then the formula is:
 // Backoff interval =
 // 		InitialDelay * BackoffGrowthRate
-type BackoffPolicy struct {
+type settings struct {
 	MaxRetries        int     // Maximum number of attempts that Retry will make.
 	MaxBackoff        int     // Maximum amount of time in milliseconds that Retry will backoff for.
 	BackoffMultiplier float32 // Multiplier used to increase the backoff delay exponentially.
@@ -25,27 +35,30 @@ const (
 	DefaultIsLogging         bool    = false
 )
 
-// NewBackoffPolicy returns a BackoffPolicy with default parameters
-func NewBackoffPolicy() *BackoffPolicy {
-	return &BackoffPolicy{
-		MaxRetries:        DefaultMaxRetries,
-		MaxBackoff:        DefaultMaxBackoff,
-		BackoffMultiplier: DefaultBackoffMultiplier,
-		MaxRandomJitter:   DefaultMaxRandomJitter,
-		InitialDelay:      DefaultInitialDelay,
-		IsLogging:         DefaultIsLogging,
+// NewPolicy returns a settings with default parameters
+func NewPolicy() *Policy {
+	return &Policy{
+		Settings: &settings{
+			MaxRetries:        DefaultMaxRetries,
+			MaxBackoff:        DefaultMaxBackoff,
+			BackoffMultiplier: DefaultBackoffMultiplier,
+			MaxRandomJitter:   DefaultMaxRandomJitter,
+			InitialDelay:      DefaultInitialDelay,
+			IsLogging:         DefaultIsLogging,
+		},
+		interval: 0,
 	}
 }
 
-// NewCustomBackoffPolicy returns a BackoffPolicy with custom parameters
-func NewCustomBackoffPolicy(
+// NewCustomPolicy returns a settings with custom parameters
+func NewCustomPolicy(
 	maxRetries int,
 	maxBackoff int,
 	backoffMultiplier float32,
 	maxRandomJitter int32,
 	initialDelay int32,
 	isLogging bool,
-) (*BackoffPolicy, error) {
+) (*Policy, error) {
 	if maxRetries < 0 {
 		return nil, &inputError{err: "maxRetries cannot be negative"}
 	}
@@ -62,12 +75,15 @@ func NewCustomBackoffPolicy(
 		return nil, &inputError{err: "initialDelay cannot be negative"}
 	}
 
-	return &BackoffPolicy{
-		MaxRetries:        maxRetries,
-		MaxBackoff:        maxBackoff,
-		BackoffMultiplier: backoffMultiplier,
-		MaxRandomJitter:   maxRandomJitter,
-		InitialDelay:      initialDelay,
-		IsLogging:         isLogging,
+	return &Policy{
+		Settings: &settings{
+			MaxRetries:        DefaultMaxRetries,
+			MaxBackoff:        DefaultMaxBackoff,
+			BackoffMultiplier: DefaultBackoffMultiplier,
+			MaxRandomJitter:   DefaultMaxRandomJitter,
+			InitialDelay:      DefaultInitialDelay,
+			IsLogging:         DefaultIsLogging,
+		},
+		interval: 0,
 	}, nil
 }

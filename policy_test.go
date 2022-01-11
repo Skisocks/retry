@@ -17,13 +17,13 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 		inputInitialDelay      int32
 		inputIsLogging         bool
 
-		expectedPolicy *BackoffPolicy
+		expectedPolicy *settings
 		errIsExpected  bool
 	}{
 		{
 			name:            "base",
 			inputMaxRetries: 10, inputMaxBackoff: 6000, inputBackoffMultiplier: 2, inputMaxRandomJitter: 500, inputInitialDelay: 500,
-			expectedPolicy: &BackoffPolicy{
+			expectedPolicy: &settings{
 				MaxRetries:        10,
 				MaxBackoff:        6000,
 				BackoffMultiplier: 2,
@@ -63,7 +63,7 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 		testName := fmt.Sprintf("%s test", testCase.name)
 
 		t.Run(testName, func(t *testing.T) {
-			actualTestPolicy, err := NewCustomBackoffPolicy(
+			actualTestPolicy, err := NewCustomPolicy(
 				testCase.inputMaxRetries,
 				testCase.inputMaxBackoff,
 				testCase.inputBackoffMultiplier,
@@ -86,7 +86,7 @@ func TestNewCustomBackoffPolicy(t *testing.T) {
 }
 
 func TestNewBackoffPolicy(t *testing.T) {
-	expectedTestPolicy := &BackoffPolicy{
+	expectedTestPolicy := &settings{
 		MaxRetries:        0,
 		MaxBackoff:        0,
 		BackoffMultiplier: 2,
@@ -95,7 +95,7 @@ func TestNewBackoffPolicy(t *testing.T) {
 		IsLogging:         false,
 	}
 
-	actualTestPolicy := NewBackoffPolicy()
+	actualTestPolicy := NewPolicy()
 	if !reflect.DeepEqual(actualTestPolicy, expectedTestPolicy) {
 		t.Errorf("got: %+v, expected: %+v", *actualTestPolicy, *expectedTestPolicy)
 	}

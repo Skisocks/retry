@@ -21,7 +21,7 @@ func TestRetry(t *testing.T) {
 		{name: "success on max retry", functionSuccessOn: 3, expectedIsError: false},
 	}
 
-	inputPolicy := &BackoffPolicy{
+	inputPolicy := &settings{
 		MaxRetries:        3,
 		MaxBackoff:        0,
 		BackoffMultiplier: 2,
@@ -77,12 +77,12 @@ func TestRetry(t *testing.T) {
 func TestCalculateBackoff(t *testing.T) {
 	testCases := []struct {
 		name            string
-		inputPolicy     *BackoffPolicy
+		inputPolicy     *settings
 		expectedBackoff []time.Duration
 	}{
 		{
 			name: "base",
-			inputPolicy: &BackoffPolicy{
+			inputPolicy: &settings{
 				MaxRetries:        0,
 				MaxBackoff:        6000,
 				BackoffMultiplier: 2,
@@ -94,7 +94,7 @@ func TestCalculateBackoff(t *testing.T) {
 		},
 		{
 			name: "initialDelay",
-			inputPolicy: &BackoffPolicy{
+			inputPolicy: &settings{
 				MaxRetries:        0,
 				MaxBackoff:        16000,
 				BackoffMultiplier: 2,
@@ -106,7 +106,7 @@ func TestCalculateBackoff(t *testing.T) {
 		},
 		{
 			name: "backoffMultiplier",
-			inputPolicy: &BackoffPolicy{
+			inputPolicy: &settings{
 				MaxRetries:        0,
 				MaxBackoff:        27000,
 				BackoffMultiplier: 3,
@@ -119,7 +119,7 @@ func TestCalculateBackoff(t *testing.T) {
 
 		{
 			name: "no backoffMultiplier",
-			inputPolicy: &BackoffPolicy{
+			inputPolicy: &settings{
 				MaxRetries:        0,
 				MaxBackoff:        27000,
 				BackoffMultiplier: 1,
@@ -152,7 +152,7 @@ func TestCalculateBackoff(t *testing.T) {
 
 // TestCalculateBackoff2 tests calculateBackoff with random jitter
 func TestCalculateBackoff2(t *testing.T) {
-	inputPolicy := &BackoffPolicy{
+	inputPolicy := &settings{
 		MaxRetries:        10,
 		MaxBackoff:        6000,
 		BackoffMultiplier: 2,
@@ -192,11 +192,11 @@ func TestCalculateBackoff2(t *testing.T) {
 func TestIsLogging(t *testing.T) {
 	testCases := []struct {
 		name       string
-		testPolicy *BackoffPolicy
+		testPolicy *settings
 	}{
 		{
 			name: "with logging",
-			testPolicy: &BackoffPolicy{
+			testPolicy: &settings{
 				MaxRetries:        10,
 				MaxBackoff:        6000,
 				BackoffMultiplier: 2,
@@ -207,7 +207,7 @@ func TestIsLogging(t *testing.T) {
 		},
 		{
 			name: "without logging",
-			testPolicy: &BackoffPolicy{
+			testPolicy: &settings{
 				MaxRetries:        10,
 				MaxBackoff:        6000,
 				BackoffMultiplier: 2,
@@ -248,7 +248,7 @@ func TestIsLogging(t *testing.T) {
 }
 
 func BenchmarkRetry(b *testing.B) {
-	benchmarkPolicy := &BackoffPolicy{
+	benchmarkPolicy := &settings{
 		MaxRetries:        10,
 		MaxBackoff:        0,
 		BackoffMultiplier: 1,
@@ -267,7 +267,7 @@ func BenchmarkRetry(b *testing.B) {
 }
 
 func BenchmarkCalculateBackoff(b *testing.B) {
-	benchmarkPolicy := &BackoffPolicy{
+	benchmarkPolicy := &settings{
 		MaxRetries:        10,
 		MaxBackoff:        0,
 		BackoffMultiplier: 2,
@@ -288,7 +288,7 @@ func BenchmarkCalculateBackoff(b *testing.B) {
 func ExampleRetry() {
 	// A function that may fail returning an error
 	retryableFunction := func() error { return nil }
-	if err := Retry(retryableFunction, NewBackoffPolicy()); err != nil {
+	if err := Retry(retryableFunction, NewPolicy()); err != nil {
 		// Handle error
 		return
 	}
@@ -297,7 +297,7 @@ func ExampleRetry() {
 
 func ExampleRetry_second() {
 	// A custom backoff policy
-	myPolicy, err := NewCustomBackoffPolicy(10, 0, 2, 1000, 1000, false)
+	myPolicy, err := NewCustomPolicy(10, 0, 2, 1000, 1000, false)
 	if err != nil {
 		// Handle error
 		return
