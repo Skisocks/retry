@@ -1,6 +1,6 @@
-// Package retry implements exponential backoff algorithms to successfully retry functions.
+// Package retry implements exponential calculateBackoff algorithms to successfully retry functions.
 //
-// Use Retry function with a NewCustomBackoffPolicy to re-execute any retryable function with default parameters.
+// Use Retry function with a NewCustomBackoffPolicy to re-execute any retryable function with custom parameters.
 // Alternatively you can use NewBackoffPolicy to re-execute with generic parameters for ease of use.
 //
 // This package currently cannot be used with channels.
@@ -18,7 +18,7 @@ type function func() error
 // If it does not succeed before BackoffPolicy.MaxRetries is reached then a maxRetryError is returned.
 func Retry(function function, policy *BackoffPolicy) error {
 	retryAttempt := 1
-	var backoffGrowthRate int32 = 1
+	var backoffGrowthRate float32 = 1
 	rand.Seed(time.Now().Unix())
 
 	for {
@@ -27,7 +27,7 @@ func Retry(function function, policy *BackoffPolicy) error {
 			if retryAttempt == 1 {
 				return nil
 			}
-			log.Printf("function was sucsessful on attempt: %d\n", retryAttempt)
+			isLogging(policy, "function was successful on attempt: %d\n", retryAttempt)
 			return nil
 		}
 
@@ -35,34 +35,45 @@ func Retry(function function, policy *BackoffPolicy) error {
 		if retryAttempt == policy.MaxRetries {
 			return &maxRetryError{maxRetries: policy.MaxRetries}
 		}
-		log.Printf("function was unsuccessful on attempt: %d\n", retryAttempt)
+		isLogging(policy, "function was unsuccessful on attempt: %d\n", retryAttempt)
 
 		// Sleep
-		backoff(backoffGrowthRate, policy)
+		time.Sleep(calculateBackoff(backoffGrowthRate, policy))
 
-		// Increase the backoff & increment the retry counter
+		// Increase the calculateBackoff & increment the retry counter
 		backoffGrowthRate *= policy.BackoffMultiplier
 		retryAttempt++
 	}
 }
 
-// backoff causes Retry to sleep for a period depending on the config settings
-func backoff(backoffGrowthRate int32, cfg *BackoffPolicy) {
-	var backoff time.Duration
+// calculateBackoff returns the next backoff interval that Retry should sleep for depending on the policy variables
+func calculateBackoff(backoffGrowthRate float32, policy *BackoffPolicy) time.Duration {
+	var currentBackoff time.Duration
 
-	// Add random jitter to the backoff time
-	if cfg.MaxRandomJitter == 0 {
-		backoff = time.Duration(cfg.InitialDelay*backoffGrowthRate) * time.Millisecond
+	// Convert int to float32
+	initialDelay := float32(policy.InitialDelay)
+	maxRandomJitter := rand.Float32() * float32(policy.MaxRandomJitter)
+
+	// Add random jitter to the currentBackoff time
+	if maxRandomJitter == 0 {
+		currentBackoff = time.Duration(initialDelay*backoffGrowthRate) * time.Millisecond
 	} else {
-		backoff = time.Duration((rand.Int31n(cfg.MaxRandomJitter)+cfg.InitialDelay)*backoffGrowthRate) * time.Millisecond
+		currentBackoff = time.Duration((maxRandomJitter+initialDelay)*backoffGrowthRate) * time.Millisecond
 	}
 
-	// Limit backoff to the maximum value set in config
-	maxBackoff := time.Duration(cfg.MaxBackoff) * time.Millisecond
-	if backoff > maxBackoff && maxBackoff != 0 {
-		backoff = maxBackoff
+	// Limit currentBackoff to the maximum value set in config
+	maxBackoff := time.Duration(policy.MaxBackoff) * time.Millisecond
+	if currentBackoff > maxBackoff && maxBackoff != 0 {
+		currentBackoff = maxBackoff
 	}
 
-	log.Printf("backoff: %d", backoff/time.Millisecond)
-	time.Sleep(backoff)
+	isLogging(policy, "currentBackoff: %d", currentBackoff/time.Millisecond)
+	return currentBackoff
+}
+
+// isLogging logs format with parameters if logging has been selected in the policy
+func isLogging(policy *BackoffPolicy, format string, params ...interface{}) {
+	if policy.IsLogging {
+		log.Printf(format, params...)
+	}
 }
