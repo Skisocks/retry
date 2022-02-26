@@ -46,3 +46,4 @@ if err := retry.Retry(retryableFunction, myBackoffPolicy); err != nil {
 [MIT](https://choosealicense.com/licenses/mit/)
 
 <a target="_blank" href="https://icons8.com/icon/57Gd8pKUv4bp/reload">Reload</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
